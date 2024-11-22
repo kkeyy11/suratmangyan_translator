@@ -68,3 +68,5 @@ def predict_translation(image_path):
 
     except Exception as e:
         return f"Prediction error: {str(e)}"
+    
+    #no segmentation yet

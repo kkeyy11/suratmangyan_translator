@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mangyan Translator</title>
+</head>
+<body>
+    <h1>Mangyan Translator</h1>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="image">Upload or Capture Image:</label>
+        <input type="file" id="image" name="image" accept="image/*" capture="camera"><br><br>
+        <button type="submit">Translate</button>
+    </form>
+    <p id="output"></p>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch("", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await response.json();
+                document.getElementById('output').textContent = data.translated_text || data.error;
+            } catch (error) {
+                document.getElementById('output').textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

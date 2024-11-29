@@ -23,3 +23,5 @@ def translate_image(request):
 
     # Render the upload form for GET requests
     return render(request, 'translator/translate.html')
+
+#under development :<

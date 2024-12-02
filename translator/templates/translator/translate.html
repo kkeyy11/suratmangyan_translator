@@ -4,58 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'translator/css/styles.css' %}">
     <title>Mangyan Translator</title>
-    
 </head>
 <body>
     <div class="container">
-        <h1>Mangyan Translator</h1>
-        <form id="uploadForm" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <label for="image">Upload or Capture Image:</label><br>
-            <input type="file" id="image" name="image" accept="image/*" capture="camera"><br>
-            <div class="preview-container">
-                <img id="preview" alt="Image Preview">
-            </div>
-            <button type="submit">Translate</button>
-        </form>
-        <p id="output"></p>
+        <!-- Translator Form -->
+        <div class="form-container">
+            <h2>Mangyan Translator</h2>
+            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="image">Upload or Capture Image:</label><br>
+                <input type="file" id="image" name="image" accept="image/*"><br>
+                <div class="preview-container">
+                    <img id="preview" alt="Image Preview">
+                </div>
+                <button type="submit">Translate</button>
+            </form>
+            <p id="output"></p>
+        </div>
+        <!-- Camera Feed -->
+        <div class="camera-container">
+            <h2>Live Camera</h2>
+            <video id="camera" autoplay muted></video>
+            <button id="captureButton">Capture</button>
+            <canvas id="captureCanvas"></canvas>
+        </div>
     </div>
 
-    <script>
-        const imageInput = document.getElementById('image');
-        const preview = document.getElementById('preview');
-
-        imageInput.addEventListener('change', () => {
-            const file = imageInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    preview.src = e.target.result;
-                    preview.style.display = "block";
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.style.display = "none";
-            }
-        });
-
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-
-            try {
-                const response = await fetch("", {
-                    method: "POST",
-                    body: formData,
-                });
-                const data = await response.json();
-                document.getElementById('output').textContent = data.translated_text || data.error;
-            } catch (error) {
-                document.getElementById('output').textContent = `Error: ${error.message}`;
-            }
-        });
-    </script>
+    <!-- Link to external JavaScript file -->
+    <script src="{% static 'translator/js/scripts.js' %}"></script>
 </body>
 </html>

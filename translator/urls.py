@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import translate_image
 from . import views
 
 urlpatterns = [
-    path('', translate_image, name='translate_image'),
+    path('', views.translate_image, name='translate_image'),
     path('translate/', views.translate_image, name='translate_image'),
+    #path('history/', views.history, name='history'),  # New URL for History page
 ]

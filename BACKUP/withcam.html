@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Mangyan Translator</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 20px;
+        }
+
+        .camera-container, .form-container {
+            width: 48%;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+
+        canvas#captureCanvas {
+            display: none;
+        }
+
+        img#preview {
+            max-width: 100%;
+            height: auto;
+            display: none;
+            margin-top: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Camera Feed -->
+        <div class="camera-container">
+            <h2>Live Camera</h2>
+            <video id="camera" autoplay muted></video>
+            <button id="captureButton">Capture</button>
+            <canvas id="captureCanvas"></canvas>
+        </div>
+
+        <!-- Translator Form -->
+        <div class="form-container">
+            <h2>Mangyan Translator</h2>
+            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="image">Upload or Capture Image:</label><br>
+                <input type="file" id="image" name="image" accept="image/*"><br>
+                <div class="preview-container">
+                    <img id="preview" alt="Image Preview">
+                </div>
+                <button type="submit">Translate</button>
+            </form>
+            <p id="output"></p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('camera');
+        const captureButton = document.getElementById('captureButton');
+        const captureCanvas = document.getElementById('captureCanvas');
+        const imageInput = document.getElementById('image');
+        const preview = document.getElementById('preview');
+
+        // Access the user's webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error("Error accessing camera:", error);
+                video.textContent = "Camera access is not available.";
+            });
+
+        // Capture image from camera feed
+        captureButton.addEventListener('click', () => {
+            const context = captureCanvas.getContext('2d');
+            captureCanvas.width = video.videoWidth;
+            captureCanvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+
+            // Convert the captured image to a data URL
+            const capturedImage = captureCanvas.toDataURL('image/png');
+
+            // Set the preview image to the captured image
+            preview.src = capturedImage;
+            preview.style.display = "block";
+
+            // Add the captured image to the form data for submission
+            const blob = dataURLtoBlob(capturedImage);
+            const file = new File([blob], 'captured.png', { type: 'image/png' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            imageInput.files = dataTransfer.files;
+
+            console.log("Image captured successfully!");
+        });
+
+        // Helper function to convert Data URL to Blob
+        function dataURLtoBlob(dataURL) {
+            const parts = dataURL.split(',');
+            const byteString = atob(parts[1]);
+            const mimeString = parts[0].split(':')[1].split(';')[0];
+
+            const arrayBuffer = new ArrayBuffer(byteString.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < byteString.length; i++) {
+                uint8Array[i] = byteString.charCodeAt(i);
+            }
+
+            return new Blob([arrayBuffer], { type: mimeString });
+        }
+
+        // Preview uploaded image
+        imageInput.addEventListener('change', () => {
+            const file = imageInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = "none";
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch("", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await response.json();
+                document.getElementById('output').textContent = data.translated_text || data.error;
+            } catch (error) {
+                document.getElementById('output').textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

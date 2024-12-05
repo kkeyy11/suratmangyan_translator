@@ -7,6 +7,7 @@ model = load_model('translator/model/mangyanscript_model.keras')
 
 # Map of predictions to Mangyan syllables
 SYLLABLE_MAP = {
+   
     0: 'a', 1: 'ba', 2: 'bi', 3: 'bu', 4: 'da', 5: 'di', 6: 'du',
     7: 'ga', 8: 'gi', 9: 'gu', 10: 'ha', 11: 'hi', 12: 'hu',
     13: 'i', 14: 'ka', 15: 'ki', 16: 'ku', 17: 'la', 18: 'li',
@@ -29,19 +30,19 @@ def preprocess_image(image_path):
     if image is None:
         raise ValueError("Error reading the image. Please check the file path.")
 
-    # Resize the image to 40x40
-    image_resized = cv2.resize(image, (40, 40))
+    # Resize the image to 64x64
+    image_resized = cv2.resize(image, (64, 64))
 
     # Normalize pixel values to the range [0, 1]
     image_normalized = image_resized / 255.0
 
-    # Expand dimensions to match model input (1, 40, 40, 1)
+    # Expand dimensions to match model input (1, 64, 64, 1)
     image_reshaped = np.expand_dims(image_normalized, axis=-1)
 
     # Convert grayscale image to 3-channel RGB equivalent
     image_rgb = np.repeat(image_reshaped, 3, axis=-1)
 
-    # Add a batch dimension (1, 40, 40, 3)
+    # Add a batch dimension (1, 64, 64, 3)
     preprocessed_image = np.expand_dims(image_rgb, axis=0)
 
     return preprocessed_image
@@ -68,5 +69,3 @@ def predict_translation(image_path):
 
     except Exception as e:
         return f"Prediction error: {str(e)}"
-    
-    #no segmentation yet

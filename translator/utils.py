@@ -7,6 +7,7 @@ model = load_model('translator/model/mangyanscript_model.keras')
 
 # Map of predictions to Mangyan syllables
 SYLLABLE_MAP = {
+   
     0: 'a', 1: 'ba', 2: 'bi', 3: 'bu', 4: 'da', 5: 'di', 6: 'du',
     7: 'ga', 8: 'gi', 9: 'gu', 10: 'ha', 11: 'hi', 12: 'hu',
     13: 'i', 14: 'ka', 15: 'ki', 16: 'ku', 17: 'la', 18: 'li',
